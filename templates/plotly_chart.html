@@ -1,0 +1,202 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>AWDB API Chart Generator</title>
+  <meta name="description" content="A simple example of how to embed a awdb sourced data table in webpage.">
+  <meta name="author" content="NRCS-NWCC">
+
+  <meta property="og:title" content="Basic awdb API js examples">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://api.snowdata.info">
+  <meta property="og:description" content="Use plotly.js and the plotly formatted /data/getDaily endpoint to create current water year graphs for a given state.">
+  <meta property="og:image" content="/android-chrome-192x192.png">
+  
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <link href="/static/favicon.ico" rel="shortcut icon">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> 
+
+</head>
+
+<body>
+
+<nav class="navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="/">
+    <img src="/static/favicon-32x32.png" width="32" height="32" class="d-inline-block align-top m-2 p-1" alt="snowflake logo">
+    awdb API Examples - Using the Plotly Formatted Endpoint
+  </a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="nav nav-tabs" id="exampleTabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="demo-tab" data-toggle="tab" href="#demo" role="tab" aria-controls="demo" aria-selected="true">Demo</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="code-tab" data-toggle="tab" href="#code" role="tab" aria-controls="code" aria-selected="false">Code</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/" aria-selected="false">API Docs</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="demo" role="tabpanel" aria-labelledby="demo-tab">
+      <!-- example below -->
+      <div class="container px-lg-5">
+        <div class="row my-1 mx-lg-n5">
+            <div class="col py-1 px-lg-5 border bg-light">
+                <div id="toolbar">
+                    <select id="state-picker" class="custom-select custom-select-sm">
+                      <option selected>Select a state...</option>
+                      <option value="AK">Alaska</option>
+                      <option value="AZ">Arizona</option>
+                      <option value="CO">Colorado</option>
+                      <option value="ID">Idaho</option>
+                      <option value="MT">Montana</option>
+                      <option value="NV">Nevada</option>
+                      <option value="NM">New Mexico</option>
+                      <option value="OR">Oregon</option>
+                      <option value="UT">Utah</option>
+                      <option value="WA">Washington</option>
+                      <option value="WY">Wyoming</option>
+                    </select>
+                </div>
+                <div id="graph" class="m-2">
+                </div>
+            </div>
+          </div>
+        </div>
+<!-- example above -->
+  </div>
+  <div class="tab-pane fade" id="code" role="tabpanel" aria-labelledby="code-tab">
+    <pre><code>
+      &lt;div class="container px-lg-5"&gt;
+        &lt;div class="row my-1 mx-lg-n5"&gt;
+            &lt;div class="col py-1 px-lg-5 border bg-light"&gt;
+                &lt;div id="toolbar"&gt;
+                    &lt;select id="state-picker" class="custom-select custom-select-sm"&gt;
+                      &lt;option selected&gt;Select a state...&lt;/option&gt;
+                      &lt;option value="AK"&gt;Alaska&lt;/option&gt;
+                      &lt;option value="AZ"&gt;Arizona&lt;/option&gt;
+                      &lt;option value="CO"&gt;Colorado&lt;/option&gt;
+                      &lt;option value="ID"&gt;Idaho&lt;/option&gt;
+                      &lt;option value="MT"&gt;Montana&lt;/option&gt;
+                      &lt;option value="NV"&gt;Nevada&lt;/option&gt;
+                      &lt;option value="NM"&gt;New Mexico&lt;/option&gt;
+                      &lt;option value="OR"&gt;Oregon&lt;/option&gt;
+                      &lt;option value="UT"&gt;Utah&lt;/option&gt;
+                      &lt;option value="WA"&gt;Washington&lt;/option&gt;
+                      &lt;option value="WY"&gt;Wyoming&lt;/option&gt;
+                    &lt;/select&gt;
+                &lt;/div&gt;
+                
+                &lt;div id="graph" class="container-md m-3"&gt;&lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
+&lt;!-- custom javascript to get data and load to chart --&gt;
+
+&lt;script type="text/javascript"&gt;
+      var $picker = $('#state-picker')
+
+      $(function() {
+        $picker.change(function () {
+        
+        var domain='{{api_root}}'
+        var state = $(this).find("option:selected").val();
+        console.log(state);
+        var siteUrl = domain + '/stations/getSites?siteId=ALL&network=SNTL&state=' + state + '&element=WTEQ&format=json';
+        
+        Plotly.d3.json(siteUrl, function(siteList){
+            var siteListStr=siteList.toString();
+            console.log(siteListStr)
+            var domain = '{{api_root}}'
+            var url = domain + '/data/getDaily?triplet=' + siteListStr + '&sDate=wy&eDate=today&element=WTEQ&format=plotly'
+            Plotly.d3.json(url, function(data){
+              console.log(data.data);
+              var layout = {
+                  title: {'text':'Current Water Year Snow Water Equivalent'},
+                  showlegend: true,
+                  yaxis: {
+                    title: 'SWE (in)'
+                  }
+                };
+                var config = {
+                  'responsive': true,
+                  'displaylogo': false,
+                  'modeBarButtonsToRemove': ['select2d', 'lasso2d']
+                };
+              Plotly.newPlot('graph', data.data, layout, config);
+            });
+          });
+        })
+      })
+    &lt;/script&gt;
+
+&lt;!-- include js and css --&gt;
+
+  &lt;link rel="apple-touch-icon" href="/static/apple-touch-icon.png"&gt;
+  &lt;link href="/static/favicon.ico" rel="shortcut icon"&gt;
+  &lt;link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"&gt;
+  &lt;link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous"&gt;
+  &lt;script src="https://cdn.plot.ly/plotly-latest.min.js"&gt;&lt;/script&gt; 
+
+    &lt;script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"&gt;&lt;/script&gt;
+    &lt;script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"&gt;&lt;/script&gt;
+    &lt;script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"&gt;&lt;/script&gt;
+
+    </pre></code>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+  var $picker = $('#state-picker')
+
+  $(function() {
+    $picker.change(function () {
+    var domain = '{{api_root}}'
+    var state = $(this).find("option:selected").val();
+    console.log(state);
+    var siteUrl = domain + '/stations/getSites?siteId=ALL&network=SNTL&state=' + state + '&element=WTEQ&format=json';
+    
+    Plotly.d3.json(siteUrl, function(siteList){
+        var siteListStr=siteList.toString();
+        console.log(siteListStr)
+        var domain = '{{api_root}}'
+        var url = domain + '/data/getDaily?triplet=' + siteListStr + '&s_date=wy&e_date=today&element=WTEQ&format=plotly'
+        Plotly.d3.json(url, function(data){
+          console.log(data.data);
+          var layout = {
+              title: {'text':'Current Water Year Snow Water Equivalent'},
+              showlegend: true,
+              yaxis: {
+                title: 'SWE (in)'
+              }
+            };
+            var config = {
+              'responsive': true,
+              'displaylogo': false,
+              'modeBarButtonsToRemove': ['select2d', 'lasso2d']
+            };
+          Plotly.newPlot('graph', data.data, layout, config);
+        });
+      });
+    })
+  })
+</script>
+
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>AWDB API Chart Generator</title>
+  <meta name="description" content="A simple example of how to embed a awdb sourced data table in webpage.">
+  <meta name="author" content="NRCS-NWCC">
+
+  <meta property="og:title" content="Basic awdb API js examples">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://api.snowdata.info">
+  <meta property="og:description" content="Use leaflet.js and the geoJson formatted /stations/getMeta endpoint to create a map of all Snotels in a given state">
+  <meta property="og:image" content="/android-chrome-192x192.png">
+  
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <link href="/static/favicon.ico" rel="shortcut icon">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+  <style>
+      #map {
+        height: 400px;
+      }
+    </style>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+</head>
+
+<body>
+
+<nav class="navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="/">
+    <img src="/static/favicon-32x32.png" width="32" height="32" class="d-inline-block align-top m-2 p-1" alt="snowflake logo">
+    awdb API Examples - Using the GeoJson endpoint with Leaflet
+  </a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="nav nav-tabs" id="exampleTabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="demo-tab" data-toggle="tab" href="#demo" role="tab" aria-controls="demo" aria-selected="true">Demo</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="code-tab" data-toggle="tab" href="#code" role="tab" aria-controls="code" aria-selected="false">Code</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/" aria-selected="false">API Docs</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="demo" role="tabpanel" aria-labelledby="demo-tab">
+      <!-- example below -->
+      <div class="container px-lg-5">
+        <div class="row my-1 mx-lg-n5">
+            <div class="col py-1 px-lg-5 border bg-light">
+                <h4>All Snotels Stations in:</h4>
+                <div id="toolbar">
+                    <select id="state-picker" class="custom-select custom-select-sm">
+                      <option selected>Select a state...</option>
+                      <option value="AK">Alaska</option>
+                      <option value="AZ">Arizona</option>
+                      <option value="CO">Colorado</option>
+                      <option value="ID">Idaho</option>
+                      <option value="MT">Montana</option>
+                      <option value="NV">Nevada</option>
+                      <option value="NM">New Mexico</option>
+                      <option value="OR">Oregon</option>
+                      <option value="UT">Utah</option>
+                      <option value="WA">Washington</option>
+                      <option value="WY">Wyoming</option>
+                    </select>
+                </div>
+                <div id="map" class="map m-2"></div>
+            </div>
+          </div>
+        </div>
+<!-- example above -->
+  </div>
+  <div class="tab-pane fade" id="code" role="tabpanel" aria-labelledby="code-tab">
+    <pre><code>
+    &lt;div class="container px-lg-5"&gt;
+        &lt;div class="row my-1 mx-lg-n5"&gt;
+            &lt;div class="col py-1 px-lg-5 border bg-light"&gt;
+                &lt;h4&gt;All Snotels Stations in:&lt;/h4&gt;
+                &lt;div id="toolbar"&gt;
+                    &lt;select id="state-picker" class="custom-select custom-select-sm"&gt;
+                      &lt;option selected&gt;Select a state...&lt;/option&gt;
+                      &lt;option value="AK"&gt;Alaska&lt;/option&gt;
+                      &lt;option value="AZ"&gt;Arizona&lt;/option&gt;
+                      &lt;option value="CO"&gt;Colorado&lt;/option&gt;
+                      &lt;option value="ID"&gt;Idaho&lt;/option&gt;
+                      &lt;option value="MT"&gt;Montana&lt;/option&gt;
+                      &lt;option value="NV"&gt;Nevada&lt;/option&gt;
+                      &lt;option value="NM"&gt;New Mexico&lt;/option&gt;
+                      &lt;option value="OR"&gt;Oregon&lt;/option&gt;
+                      &lt;option value="UT"&gt;Utah&lt;/option&gt;
+                      &lt;option value="WA"&gt;Washington&lt;/option&gt;
+                      &lt;option value="WY"&gt;Wyoming&lt;/option&gt;
+                    &lt;/select&gt;
+                &lt;/div&gt;
+                &lt;div id="map" class="map m-2"&gt;&lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
+&lt;!-- custom javascript to add map and place markers using geoJson endpoint --&gt;
+
+&lt;script type="text/javascript"&gt;
+  var map = L.map('map').setView([40.6, -114.1], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; &lt;a href="https://openstreetmap.org/copyright"&gt;OpenStreetMap contributors&lt;/a&gt;'
+      }).addTo(map);
+   L.control.scale().addTo(map);
+   var layerGroup = new L.LayerGroup();
+   layerGroup.addTo(map);
+&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+  var $picker = $('#state-picker')
+
+  $(function() {
+    $picker.change(function () {
+      var domain='{{api_root}}'
+      var state = $(this).find("option:selected").val();
+      console.log(state);
+      var metaUrl=domain + '/stations/getMeta?element=WTEQ&network=SNTL&state=' + state + '&format=geojson';
+      console.log(metaUrl)
+      Plotly.d3.json(metaUrl, function(data){
+        console.log(data);
+        layerGroup.clearLayers();
+        var geo = new L.GeoJSON(data, {
+          onEachFeature: function (feature, layer) {
+            layer.bindPopup('&lt;h4&gt;'+feature.properties.name+'&lt;/h4&gt;&lt;p&gt;Elevation: '+feature.geometry.coordinates[2]+' ft.&lt;/p&gt;');
+            }
+          }   
+        );
+        layerGroup.addLayer(geo);
+        map.fitBounds(geo.getBounds());
+      });
+    });
+  })
+&lt;/script&gt;
+
+&lt;!-- include the following js and css --&gt;
+
+  &lt;link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"&gt;
+  &lt;link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous"&gt;
+  &lt;link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/&gt;
+  &lt;style&gt;
+      #map {
+        height: 400px;
+      }
+    &lt;/style&gt;
+  &lt;script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""&gt;&lt;/script&gt;
+  &lt;script src="https://cdn.plot.ly/plotly-latest.min.js"&gt;&lt;/script&gt;
+
+&lt;script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"&gt;&lt;/script&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"&gt;&lt;/script&gt;
+&lt;script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"&gt;&lt;/script&gt;
+
+    </pre></code>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+  var map = L.map('map').setView([40.6, -114.1], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+      }).addTo(map);
+   L.control.scale().addTo(map);
+   var layerGroup = new L.LayerGroup();
+   layerGroup.addTo(map);
+</script>
+<script type="text/javascript">
+  var $picker = $('#state-picker')
+
+  $(function() {
+    $picker.change(function () {
+      var domain='{{api_root}}'
+      var state = $(this).find("option:selected").val();
+      console.log(state);
+      var metaUrl=domain + '/stations/getMeta?element=WTEQ&network=SNTL&state=' + state + '&format=geojson';
+      console.log(metaUrl)
+      Plotly.d3.json(metaUrl, function(data){
+        console.log(data);
+        layerGroup.clearLayers();
+        var geo = new L.GeoJSON(data, {
+          onEachFeature: function (feature, layer) {
+            layer.bindPopup('<h4>'+feature.properties.name+'</h4><p>Elevation: '+feature.geometry.coordinates[2]+' ft.</p>');
+            }
+          }   
+        );
+        layerGroup.addLayer(geo);
+        map.fitBounds(geo.getBounds());
+      });
+    });
+  })
+</script>
+
+</body>
+</html>
